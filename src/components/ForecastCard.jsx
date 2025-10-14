@@ -1,6 +1,6 @@
 const ForecastCard = ({ data }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-6">
       {data.map((item, index) => {
         const date = new Date(item.dt_txt).toLocaleDateString('en-US', {
           weekday: 'short',

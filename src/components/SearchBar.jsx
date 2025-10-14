@@ -1,32 +1,36 @@
 import { useState } from 'react';
 
 const SearchBar = ({ onSearch }) => {
-  const [city, setCity] = useState('');
+  const [input, setInput] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (city.trim()) {
-      onSearch(city.trim());
-      setCity('');
+  const handleSubmit = () => {
+    if (input.trim() !== '') {
+      onSearch(input.trim());
+      setInput('');
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') handleSubmit();
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <div className="flex flex-col sm:flex-row gap-2 mb-6">
       <input
         type="text"
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
         placeholder="Enter city name..."
-        className="px-4 py-2 border rounded-md w-full"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyPress={handleKeyPress}
+        className="flex-1 px-4 py-2 rounded-md text-black"
       />
       <button
-        type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+        onClick={handleSubmit}
+        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
       >
         Get Weather
       </button>
-    </form>
+    </div>
   );
 };
 
