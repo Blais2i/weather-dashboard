@@ -3,7 +3,8 @@ import SearchBar from './components/SearchBar';
 import WeatherCard from './components/WeatherCard';
 import ErrorMessage from './components/ErrorMessage';
 
-const API_KEY = 'adb5c853ec11f0c047dd238b93ab3821'; // Replace with your actual key
+const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
+ 
 
 function App() {
   const [city, setCity] = useState('');
