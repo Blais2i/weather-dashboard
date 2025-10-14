@@ -11,6 +11,7 @@ function App() {
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [recentCities, setRecentCities] = useState(() => {
     const saved = localStorage.getItem('recentCities');
     return saved ? JSON.parse(saved) : [];
@@ -18,6 +19,7 @@ function App() {
 
   const fetchWeather = async (cityName) => {
     try {
+      setLoading(true);
       setError('');
       setWeather(null);
       setForecast([]);
@@ -41,6 +43,8 @@ function App() {
       }
     } catch (err) {
       setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,6 +77,13 @@ function App() {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {loading && (
+        <div className="mt-6 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white mx-auto"></div>
+          <p className="mt-2">Loading weather data...</p>
         </div>
       )}
 
