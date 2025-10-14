@@ -11,6 +11,10 @@ function App() {
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState('');
+  const [recentCities, setRecentCities] = useState(() => {
+    const saved = localStorage.getItem('recentCities');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const fetchWeather = async (cityName) => {
     try {
@@ -43,6 +47,10 @@ function App() {
   const handleSearch = (cityName) => {
     setCity(cityName);
     fetchWeather(cityName);
+
+    const updatedCities = [cityName, ...recentCities.filter(c => c !== cityName)].slice(0, 5);
+    setRecentCities(updatedCities);
+    localStorage.setItem('recentCities', JSON.stringify(updatedCities));
   };
 
   return (
@@ -50,6 +58,23 @@ function App() {
       <h1 className="text-4xl font-bold mb-4">WeatherView</h1>
       <p className="mb-6 text-lg">Get accurate weather forecasts for any city worldwide</p>
       <SearchBar onSearch={handleSearch} />
+
+      {recentCities.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold mb-2">Recent Searches:</h2>
+          <div className="flex flex-wrap gap-2">
+            {recentCities.map((city, index) => (
+              <button
+                key={index}
+                onClick={() => handleSearch(city)}
+                className="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100"
+              >
+                {city}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {error && <ErrorMessage message={error} />}
       {weather && <WeatherCard data={weather} />}
