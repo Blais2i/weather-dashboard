@@ -2,6 +2,7 @@ import { useState } from 'react';
 import SearchBar from './components/SearchBar';
 import WeatherCard from './components/WeatherCard';
 import ForecastCard from './components/ForecastCard';
+import WeatherDetails from './components/WeatherDetails';
 import ErrorMessage from './components/ErrorMessage';
 import Landing from './components/Landing';
 
@@ -45,7 +46,6 @@ function App() {
         const daily = forecastData.list.filter((item, index) => index % 8 === 0);
         setForecast(daily);
 
-        // Optional: Fetch alerts using One Call API 3.0
         const { coord } = currentData;
         const alertRes = await fetch(
           `https://api.openweathermap.org/data/3.0/onecall?lat=${coord.lat}&lon=${coord.lon}&exclude=minutely,hourly,daily&appid=${API_KEY}`
@@ -90,7 +90,6 @@ function App() {
     }
   };
 
-  // Show landing page if no weather data yet
   if (!weather && !loading && !error) {
     return <Landing onSearch={handleSearch} recentCities={recentCities} />;
   }
@@ -100,81 +99,56 @@ function App() {
       role="main"
       className={`min-h-screen bg-gradient-to-br ${getBackgroundClass()} text-white px-4 py-6 sm:px-6 md:px-12`}
     >
-      <h1 className="text-4xl font-bold mb-4">WeatherView</h1>
-      <p className="mb-6 text-lg">Get accurate weather forecasts for any city worldwide</p>
-      <SearchBar onSearch={handleSearch} />
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-4xl font-bold mb-4">WeatherView</h1>
+        <p className="mb-6 text-lg">Get accurate weather forecasts for any city worldwide</p>
+        <SearchBar onSearch={handleSearch} />
 
-      <div className="mb-4">
-        <button
-          onClick={() => {
-            const newUnit = unit === 'metric' ? 'imperial' : 'metric';
-            setUnit(newUnit);
-            if (city) fetchWeather(city, newUnit);
-          }}
-          className="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-white"
-          aria-label={`Switch to ${unit === 'metric' ? 'Fahrenheit' : 'Celsius'}`}
-        >
-          Switch to {unit === 'metric' ? '°F' : '°C'}
-        </button>
-      </div>
+        <div className="mb-4">
+          <button
+            onClick={() => {
+              const newUnit = unit === 'metric' ? 'imperial' : 'metric';
+              setUnit(newUnit);
+              if (city) fetchWeather(city, newUnit);
+            }}
+            className="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-white"
+            aria-label={`Switch to ${unit === 'metric' ? 'Fahrenheit' : 'Celsius'}`}
+          >
+            Switch to {unit === 'metric' ? '°F' : '°C'}
+          </button>
+        </div>
 
-      {recentCities.length > 0 && (
-        <section aria-label="Recent city searches" className="mb-4">
-          <h2 className="text-lg font-semibold mb-2">Recent Searches:</h2>
-          <div className="flex flex-wrap gap-2">
-            {recentCities.map((city, index) => (
-              <button
-                key={index}
-                onClick={() => handleSearch(city)}
-                tabIndex={0}
-                aria-label={`Search weather for ${city}`}
-                className="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-white"
-              >
-                {city}
-              </button>
-            ))}
+        {loading && (
+          <div className="mt-6 text-center" role="status" aria-live="polite">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white mx-auto"></div>
+            <p className="mt-2">Loading weather data...</p>
           </div>
-        </section>
-      )}
+        )}
 
-      {loading && (
-        <div className="mt-6 text-center" role="status" aria-live="polite">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white mx-auto"></div>
-          <p className="mt-2">Loading weather data...</p>
-        </div>
-      )}
+        {error && (
+          <div role="alert" aria-live="assertive">
+            <ErrorMessage message={error} />
+          </div>
+        )}
 
-      {error && (
-        <div role="alert" aria-live="assertive">
-          <ErrorMessage message={error} />
-        </div>
-      )}
+        {weather && <WeatherCard data={weather} unit={unit} />}
+        {weather && <WeatherDetails data={weather} unit={unit} />}
+        {forecast.length > 0 && <ForecastCard data={forecast} unit={unit} />}
 
-      {weather && <WeatherCard data={weather} unit={unit} />}
-      {weather && (
-        <button
-          onClick={() => fetchWeather(city, unit)}
-          className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-white"
-          aria-label="Refresh weather data"
-        >
-          Refresh Weather
-        </button>
-      )}
-      {forecast.length > 0 && <ForecastCard data={forecast} unit={unit} />}
-
-      {alerts.length > 0 && (
-        <section className="mt-6" aria-label="Weather alerts">
-          <h2 className="text-xl font-semibold mb-2">Weather Alerts</h2>
-          <ul className="space-y-2">
-            {alerts.map((alert, index) => (
-              <li key={index} className="bg-red-100 text-red-800 p-4 rounded-md">
-                <p className="font-bold">{alert.event}</p>
-                <p>{alert.description}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+        {alerts.length > 0 && (
+          <section className="mt-6" aria-label="Weather alerts">
+            <h2 className="text-xl font-semibold mb-2">Weather Alerts</h2>
+            <ul className="space-y-2">
+              {alerts.map((alert, index) => (
+                <li key={index} className="bg-red-100 text-red-800 p-4 rounded-md">
+                  <p className="font-bold">{alert.event}</p>
+                  <p>{alert.description}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
     </main>
   );
 }
