@@ -3,6 +3,7 @@ import SearchBar from './components/SearchBar';
 import WeatherCard from './components/WeatherCard';
 import ForecastCard from './components/ForecastCard';
 import ErrorMessage from './components/ErrorMessage';
+import Landing from './components/Landing';
 
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
@@ -10,6 +11,7 @@ function App() {
   const [city, setCity] = useState('');
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [unit, setUnit] = useState('metric');
@@ -24,6 +26,7 @@ function App() {
       setError('');
       setWeather(null);
       setForecast([]);
+      setAlerts([]);
 
       const currentRes = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=${selectedUnit}&appid=${API_KEY}`
@@ -41,6 +44,14 @@ function App() {
         setWeather(currentData);
         const daily = forecastData.list.filter((item, index) => index % 8 === 0);
         setForecast(daily);
+
+        // Optional: Fetch alerts using One Call API 3.0
+        const { coord } = currentData;
+        const alertRes = await fetch(
+          `https://api.openweathermap.org/data/3.0/onecall?lat=${coord.lat}&lon=${coord.lon}&exclude=minutely,hourly,daily&appid=${API_KEY}`
+        );
+        const alertData = await alertRes.json();
+        setAlerts(alertData.alerts || []);
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -78,6 +89,11 @@ function App() {
         return 'from-purple-500 to-blue-500';
     }
   };
+
+  // Show landing page if no weather data yet
+  if (!weather && !loading && !error) {
+    return <Landing onSearch={handleSearch} recentCities={recentCities} />;
+  }
 
   return (
     <main
@@ -145,6 +161,20 @@ function App() {
         </button>
       )}
       {forecast.length > 0 && <ForecastCard data={forecast} unit={unit} />}
+
+      {alerts.length > 0 && (
+        <section className="mt-6" aria-label="Weather alerts">
+          <h2 className="text-xl font-semibold mb-2">Weather Alerts</h2>
+          <ul className="space-y-2">
+            {alerts.map((alert, index) => (
+              <li key={index} className="bg-red-100 text-red-800 p-4 rounded-md">
+                <p className="font-bold">{alert.event}</p>
+                <p>{alert.description}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </main>
   );
 }
