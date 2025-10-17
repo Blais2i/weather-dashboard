@@ -12,12 +12,13 @@ function App() {
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [unit, setUnit] = useState('metric'); // 'metric' for °C, 'imperial' for °F
   const [recentCities, setRecentCities] = useState(() => {
     const saved = localStorage.getItem('recentCities');
     return saved ? JSON.parse(saved) : [];
   });
 
-  const fetchWeather = async (cityName) => {
+  const fetchWeather = async (cityName, selectedUnit = unit) => {
     try {
       setLoading(true);
       setError('');
@@ -25,12 +26,12 @@ function App() {
       setForecast([]);
 
       const currentRes = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${API_KEY}`
+        `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=${selectedUnit}&appid=${API_KEY}`
       );
       const currentData = await currentRes.json();
 
       const forecastRes = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&units=metric&appid=${API_KEY}`
+        `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&units=${selectedUnit}&appid=${API_KEY}`
       );
       const forecastData = await forecastRes.json();
 
@@ -84,6 +85,19 @@ function App() {
       <p className="mb-6 text-lg">Get accurate weather forecasts for any city worldwide</p>
       <SearchBar onSearch={handleSearch} />
 
+      <div className="mb-4">
+        <button
+          onClick={() => {
+            const newUnit = unit === 'metric' ? 'imperial' : 'metric';
+            setUnit(newUnit);
+            if (city) fetchWeather(city, newUnit);
+          }}
+          className="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-blue-100"
+        >
+          Switch to {unit === 'metric' ? '°F' : '°C'}
+        </button>
+      </div>
+
       {recentCities.length > 0 && (
         <div className="mb-4">
           <h2 className="text-lg font-semibold mb-2">Recent Searches:</h2>
@@ -109,16 +123,16 @@ function App() {
       )}
 
       {error && <ErrorMessage message={error} />}
-      {weather && <WeatherCard data={weather} />}
+      {weather && <WeatherCard data={weather} unit={unit} />}
       {weather && (
         <button
-          onClick={() => fetchWeather(city)}
+          onClick={() => fetchWeather(city, unit)}
           className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
         >
           Refresh Weather
         </button>
       )}
-      {forecast.length > 0 && <ForecastCard data={forecast} />}
+      {forecast.length > 0 && <ForecastCard data={forecast} unit={unit} />}
     </div>
   );
 }

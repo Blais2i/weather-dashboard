@@ -1,4 +1,6 @@
-const ForecastCard = ({ data }) => {
+const ForecastCard = ({ data, unit }) => {
+  const tempUnit = unit === 'metric' ? '°C' : '°F';
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-6">
       {data.map((item, index) => {
@@ -14,7 +16,7 @@ const ForecastCard = ({ data }) => {
               alt={item.weather[0].description}
               className="mx-auto"
             />
-            <p>{item.main.temp}°C</p>
+            <p>{item.main.temp}{tempUnit}</p>
             <p>{item.weather[0].main}</p>
           </div>
         );
