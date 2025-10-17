@@ -15,10 +15,11 @@ const SearchBar = ({ onSearch }) => {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 mb-6">
+    <div className="flex flex-col sm:flex-row gap-2 mb-6" role="search" aria-label="City weather search">
       <input
         type="text"
         placeholder="Enter city name..."
+        aria-label="City name"
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyPress={handleKeyPress}
@@ -26,7 +27,8 @@ const SearchBar = ({ onSearch }) => {
       />
       <button
         onClick={handleSubmit}
-        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+        aria-label="Search for weather"
+        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-white"
       >
         Get Weather
       </button>

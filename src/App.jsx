@@ -12,7 +12,7 @@ function App() {
   const [forecast, setForecast] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [unit, setUnit] = useState('metric'); // 'metric' for °C, 'imperial' for °F
+  const [unit, setUnit] = useState('metric');
   const [recentCities, setRecentCities] = useState(() => {
     const saved = localStorage.getItem('recentCities');
     return saved ? JSON.parse(saved) : [];
@@ -80,7 +80,10 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${getBackgroundClass()} text-white px-4 py-6 sm:px-6 md:px-12`}>
+    <main
+      role="main"
+      className={`min-h-screen bg-gradient-to-br ${getBackgroundClass()} text-white px-4 py-6 sm:px-6 md:px-12`}
+    >
       <h1 className="text-4xl font-bold mb-4">WeatherView</h1>
       <p className="mb-6 text-lg">Get accurate weather forecasts for any city worldwide</p>
       <SearchBar onSearch={handleSearch} />
@@ -92,48 +95,57 @@ function App() {
             setUnit(newUnit);
             if (city) fetchWeather(city, newUnit);
           }}
-          className="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-blue-100"
+          className="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-white"
+          aria-label={`Switch to ${unit === 'metric' ? 'Fahrenheit' : 'Celsius'}`}
         >
           Switch to {unit === 'metric' ? '°F' : '°C'}
         </button>
       </div>
 
       {recentCities.length > 0 && (
-        <div className="mb-4">
+        <section aria-label="Recent city searches" className="mb-4">
           <h2 className="text-lg font-semibold mb-2">Recent Searches:</h2>
           <div className="flex flex-wrap gap-2">
             {recentCities.map((city, index) => (
               <button
                 key={index}
                 onClick={() => handleSearch(city)}
-                className="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100"
+                tabIndex={0}
+                aria-label={`Search weather for ${city}`}
+                className="bg-white text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-white"
               >
                 {city}
               </button>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {loading && (
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center" role="status" aria-live="polite">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white mx-auto"></div>
           <p className="mt-2">Loading weather data...</p>
         </div>
       )}
 
-      {error && <ErrorMessage message={error} />}
+      {error && (
+        <div role="alert" aria-live="assertive">
+          <ErrorMessage message={error} />
+        </div>
+      )}
+
       {weather && <WeatherCard data={weather} unit={unit} />}
       {weather && (
         <button
           onClick={() => fetchWeather(city, unit)}
-          className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+          className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-white"
+          aria-label="Refresh weather data"
         >
           Refresh Weather
         </button>
       )}
       {forecast.length > 0 && <ForecastCard data={forecast} unit={unit} />}
-    </div>
+    </main>
   );
 }
 
